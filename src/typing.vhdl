@@ -69,8 +69,10 @@ begin
 	--		output=>TasciiLow);
 	--W2 : hex2ascii port map(input=>Tscancode(7 downto 4),
 	--		output=>TasciiHigh);
-   process(clk, reset, Tscancode) begin
-		if (clk'event and clk = '1') then
+   process(clk, reset) begin
+		if (reset = '1') then
+			ThighFlag <= '0';
+		elsif (clk'event and clk = '1') then
 			Tascii <= scan2ascii(Tscancode);
 			if (ThighFlag = '1') then
 				TwEn <= '1';

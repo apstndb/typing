@@ -80,16 +80,12 @@ package body UTIL is
 	function jisshift(input:std_logic_vector)
 		return std_logic_vector is
 	begin
-		if (x"3" = input(7 downto 4)) then
-			return input - x"10";
-		elsif (x"2" = input(7 downto 4)) then
-			return input + x"10";
-		elsif (x"5" = input(7 downto 4) or x"40" = input) then
-			return input + x"20";
-		elsif (x"61" <= input and input <= x"7a") then
-			return input - x"20";
-		else
-			return x"ff";
-		end if;
+		case input(7 downto 4) is
+			when x"3" => return input - x"10";
+			when x"2" => return input + x"10";
+			when x"5" | x"4" => return input + x"20";
+			when x"6" | x"7" => return input - x"20";
+			when others => return x"ff";
+		end case;
 	end jisshift;
 end UTIL;

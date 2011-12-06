@@ -18,7 +18,7 @@ package body UTIL is
 		if (input < x"a") then
 			return ("0000" & input) + x"30";
 		else
-			return ("0000" & input) + (x"41" - x"a");
+			return ("0000" & input) + (x"41" - x"0a");
 		end if;
 	end hex2ascii;
 	function scan2ascii (input: std_logic_vector)
@@ -81,9 +81,9 @@ package body UTIL is
 		return std_logic_vector is
 	begin
 		case input(7 downto 4) is
-			when x"3" => return input - x"10";
 			when x"2" => return input + x"10";
-			when x"5" | x"4" => return input + x"20";
+			when x"3" => return input - x"10";
+			when x"4" | x"5" => return input + x"20";
 			when x"6" | x"7" => return input - x"20";
 			when others => return x"ff";
 		end case;

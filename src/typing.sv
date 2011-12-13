@@ -1,18 +1,29 @@
+// vim: set filetype=verilog
 module typing(
-input clk,
-input reset,
-input ps2clk,
-input ps2data,
-output[3:0] lcdData,
-output lcdRS,
-output lcdE
+	input clk,
+	input reset,
+	inout ps2clk,
+	inout ps2data,
+	output[3:0] lcdData,
+	output lcdRS,
+	output lcdE
 );
-	byte unsigned sScancode;
-	byte unsigned sDIn;
-	bit[3:0] sCharNum;
-	bit sWEn;
-	bit sHighFlag;
-	byte unsigned sAscii;
+byte unsigned scancode;
+byte unsigned dIn;
+bit[3:0] charNum;
+bit wEn;
+bit rx_released_prev;
+bit rx_released;
+byte unsigned rx_ascii;
+byte unsigned rx_ascii_prev;
+
+function[7:0] hex2ascii;
+input[3:0] hex;
+if (hex < 4'ha)
+	hex2ascii = {4'b0000, hex} + 8'h30;
+else
+	hex2ascii = {4'b0000, hex} + (8'h41 - 8'h0a);
+endfunction
 
 function[7:0] scan2ascii;
 input[7:0] scan;
@@ -83,23 +94,32 @@ endfunction
 
 LCDDriver4Bit LCD (.clk(clk), .reset(reset),
 		.lcdData(lcdData), .lcdRs(lcdRS), .lcdE(lcdE),
-		.wEn(sWEn), .charNum(sCharNum), .dIn(sDIn));
-ps2read KBD (.clk(clk), .reset(reset),
-		.ps2clk(ps2clk), .ps2data(ps2data), .scancode(sScancode));
+		.wEn(wEn), .charNum(charNum), .dIn(dIn));
+ps2_keyboard_interface KBD (.clk(clk), .reset(reset),
+		.ps2_clk(ps2clk), .ps2_data(ps2data), .rx_scan_code(scancode), .rx_ascii(rx_ascii), .rx_released(rx_released));
 always@(posedge clk, posedge reset) begin
-	if (reset)
-		sHighFlag = 0;
-	else begin
-		sWEn = 1;
-		sAscii = scan2ascii(sScancode);
-		if (sHighFlag == 1) begin
-			sCharNum = 0;
-			sDIn = jisshift(sAscii);
-		end else begin
-			sCharNum = 1;
-			sDIn <= sAscii;
-		end
-		sHighFlag = !sHighFlag;
+	if (reset) begin
+		charNum <= 15;
+		wEn <= 0;
+	end else begin
+		//rx_ascii = scan2ascii(scancode);
+		//if (charNum == 1) begin
+		//	dIn = jisshift(rx_ascii);
+		//end else if(charNum == 2) begin
+		//	dIn = rx_ascii;
+		//end else if(charNum == 3) begin
+		//	dIn = hex2ascii(scancode[7:4]);
+		//end else begin
+		//	dIn = hex2ascii(scancode[3:0]);
+		//end
+		if((rx_released_prev||rx_ascii != rx_ascii_prev) && !rx_released) begin
+			wEn <= 1;
+			dIn <= rx_ascii;
+			++charNum;// = (charNum+1)%4;
+		end else
+			wEn <= 0;
+		rx_released_prev <= rx_released;
+		rx_ascii_prev <= rx_ascii; 
 	end
 end
 endmodule

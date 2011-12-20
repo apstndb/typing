@@ -11,11 +11,14 @@ module typing(
 byte unsigned scancode;
 byte unsigned dIn;
 bit[3:0] charNum;
+bit[3:0] charNumPrev;
 bit wEn;
 bit rx_released_prev;
 bit rx_released;
+bit[3:0] wordNum;
 byte unsigned rx_ascii;
 byte unsigned rx_ascii_prev;
+bit[0:15][7:0] target_string;
 
 function[7:0] hex2ascii;
 input[3:0] hex;
@@ -23,6 +26,29 @@ if (hex < 4'ha)
 	hex2ascii = {4'b0000, hex} + 8'h30;
 else
 	hex2ascii = {4'b0000, hex} + (8'h41 - 8'h0a);
+endfunction
+
+function[0:15][7:0] string_table;
+input[3:0] num;
+case(num)
+	4'h0	: string_table = 128'h61626364656600000000000000000000;
+	4'h1	: string_table = 128'h66656463626100000000000000000000;
+	4'h2	: string_table = 128'h63626364656600000000000000000000;
+	4'h3	: string_table = 128'h64626364656600000000000000000000;
+	4'h4	: string_table = 128'h65626364656600000000000000000000;
+	4'h5	: string_table = 128'h66626364656600000000000000000000;
+	4'h6	: string_table = 128'h67626364656600000000000000000000;
+	4'h7	: string_table = 128'h68626364656600000000000000000000;
+	4'h8	: string_table = 128'h69626364656600000000000000000000;
+	4'h9	: string_table = 128'h6a626364656600000000000000000000;
+	4'ha	: string_table = 128'h6b626364656600000000000000000000;
+	4'hb	: string_table = 128'h6c626364656600000000000000000000;
+	4'hc	: string_table = 128'h6d626364656600000000000000000000;
+	4'hd	: string_table = 128'h6e626364656600000000000000000000;
+	4'he	: string_table = 128'h6f626364656600000000000000000000;
+	4'hf	: string_table = 128'h70626364656600000000000000000000;
+	default	: string_table = 128'h00000000000000000000000000000000;
+endcase
 endfunction
 
 function[7:0] scan2ascii;
@@ -93,13 +119,16 @@ endcase
 endfunction
 
 LCDDriver4Bit LCD (.clk(clk), .reset(reset),
-		.lcdData(lcdData), .lcdRs(lcdRS), .lcdE(lcdE),
-		.wEn(wEn), .charNum(charNum), .dIn(dIn));
+	.lcdData(lcdData), .lcdRs(lcdRS), .lcdE(lcdE),
+	.wEn(wEn), .charNum(charNumPrev), .dIn(dIn));
 ps2_keyboard_interface KBD (.clk(clk), .reset(reset),
-		.ps2_clk(ps2clk), .ps2_data(ps2data), .rx_scan_code(scancode), .rx_ascii(rx_ascii), .rx_released(rx_released));
+	.ps2_clk(ps2clk), .ps2_data(ps2data),
+	.rx_scan_code(scancode), .rx_ascii(rx_ascii), .rx_released(rx_released));
 always@(posedge clk, posedge reset) begin
 	if (reset) begin
-		charNum <= 15;
+		target_string <= string_table(0);
+		wordNum <= 0;
+		charNum <= 0;
 		wEn <= 0;
 	end else begin
 		//rx_ascii = scan2ascii(scancode);
@@ -112,12 +141,19 @@ always@(posedge clk, posedge reset) begin
 		//end else begin
 		//	dIn = hex2ascii(scancode[3:0]);
 		//end
-		if((rx_released_prev||rx_ascii != rx_ascii_prev) && !rx_released) begin
+		if((rx_released_prev||rx_ascii != rx_ascii_prev) &&
+		!rx_released && rx_ascii == target_string[charNum]) begin
 			wEn <= 1;
 			dIn <= rx_ascii;
-			++charNum;// = (charNum+1)%4;
+			if(target_string[charNum+4'b1] == 4'h0) begin
+				target_string <= string_table(wordNum+4'b1);
+				wordNum <= wordNum + 4'b1;
+				charNum <= 4'h0;
+			end else
+				charNum <= charNum + 4'b1;
 		end else
 			wEn <= 0;
+		charNumPrev <= charNum;
 		rx_released_prev <= rx_released;
 		rx_ascii_prev <= rx_ascii; 
 	end

@@ -175,8 +175,8 @@ parameter m1_tx_wait_keyboard_ack = 6;
 parameter m1_tx_done_recovery = 7;
 parameter m1_tx_error_no_keyboard_ack = 8;
 parameter m1_tx_rising_edge_marker = 9;
-parameter m2_rx_data_ready = 1;
-parameter m2_rx_data_ready_ack = 0;
+parameter m2_rx_data_ready = 1'b1;
+parameter m2_rx_data_ready_ack = 1'b0;
 
   
 // I/O declarations
@@ -451,7 +451,7 @@ begin
   else if ( (m1_state == m1_rx_falling_edge_marker)   // increment for rx
            ||(m1_state == m1_tx_rising_edge_marker)   // increment for tx
            )
-    bit_count <= bit_count + 1;
+    bit_count <= bit_count + 4'b1;
 end
 // This signal is high for one clock at the end of the timer count.
 assign rx_shifting_done = (bit_count == `TOTAL_BITS);
@@ -480,7 +480,7 @@ end
 always @(posedge clk)
 begin
   if (~enable_timer_60usec) timer_60usec_count <= 0;
-  else if (~timer_60usec_done) timer_60usec_count <= timer_60usec_count + 1;
+  else if (~timer_60usec_done) timer_60usec_count <= timer_60usec_count + 8'b1;
 end
 assign timer_60usec_done = (timer_60usec_count == (TIMER_60USEC_VALUE_PP - 1));
 
@@ -488,7 +488,7 @@ assign timer_60usec_done = (timer_60usec_count == (TIMER_60USEC_VALUE_PP - 1));
 always @(posedge clk)
 begin
   if (~enable_timer_5usec) timer_5usec_count <= 0;
-  else if (~timer_5usec_done) timer_5usec_count <= timer_5usec_count + 1;
+  else if (~timer_5usec_done) timer_5usec_count <= timer_5usec_count + 8'b1;
 end
 assign timer_5usec_done = (timer_5usec_count == TIMER_5USEC_VALUE_PP - 1);
 

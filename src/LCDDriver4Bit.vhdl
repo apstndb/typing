@@ -21,7 +21,7 @@ entity LCDDriver4Bit is
 				lcdE			: out		std_logic);
 end LCDDriver4Bit;
 
-architecture Structural of LCDDriver4Bit is
+architecture RTL of LCDDriver4Bit is
 
 	-- LCD interface constants
 	constant DATA_CODE		: std_logic := '1';
@@ -226,4 +226,4 @@ begin
 	end if;
 end process;
 
-end Structural;
+end RTL;

@@ -12,8 +12,11 @@ entity LCDDriver4Bit is
 
 				-- Screen Buffer Interface
 				dIn			: in		std_logic_vector(7 downto 0);
+				lineIn			: in	std_logic_vector(0 to 8*8-1);
+				nextLineIn			: in	std_logic_vector(0 to 8*8-1);
 				charNum		: in		integer range 0 to 15;
 				wEn			: in		std_logic;
+				wLineEn			: in		std_logic;
 
 				-- LCD Interface
 				lcdData		: out		std_logic_vector(3 downto 0);
@@ -22,7 +25,15 @@ entity LCDDriver4Bit is
 end LCDDriver4Bit;
 
 architecture RTL of LCDDriver4Bit is
-
+	function null2space(input:std_logic_vector)
+		return std_logic_vector is
+	begin
+			if (input = x"00") then
+				return x"20";
+			else
+				return input;
+			end if;
+	end null2space;
 	-- LCD interface constants
 	constant DATA_CODE		: std_logic := '1';
 	constant INSN_CODE		: std_logic := '0';
@@ -98,6 +109,13 @@ begin
 	if (clk'event and clk='1') then
 		if (wEn='1') then
 			charRAM(charNum) <= dIn;
+		elsif (wLineEn='1') then
+			for i in 0 to 7 loop
+				charRAM(i) <= null2space(lineIn(8*i to 8*i+7));
+			end loop;
+			for i in 0 to 7 loop
+				charRAM(i+8) <= null2space(nextLineIn(8*i to 8*i+7));
+			end loop;
 		end if;
 	end if;
 end process;

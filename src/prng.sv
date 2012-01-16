@@ -5,7 +5,7 @@ always @(posedge reset, posedge clk)
 begin
 	if(reset)
 		random = 0;
-	else if(clk)
+	else
 		++random;
 end
 endmodule

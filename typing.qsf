@@ -548,6 +548,7 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_instance_assignment -name FAST_INPUT_REGISTER ON -to *
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to *
 set_instance_assignment -name TSU_REQUIREMENT "10 ns" -from * -to *
+set_global_assignment -name SYSTEMVERILOG_FILE src/functions.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/min_counter.sv
 set_global_assignment -name VHDL_FILE src/count10d.vhd
 set_global_assignment -name VHDL_FILE src/leddec.vhd
@@ -557,4 +558,8 @@ set_global_assignment -name SYSTEMVERILOG_FILE src/typing.sv
 set_global_assignment -name VERILOG_FILE src/ps2_keyboard.v
 set_global_assignment -name SYSTEMVERILOG_FILE src/prng.sv
 set_global_assignment -name VHDL_FILE src/LCDDriver4Bit.vhdl
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

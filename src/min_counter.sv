@@ -3,7 +3,7 @@ module min_counter(input clk, input reset,
 parameter CLOCK_HZ = 50000000;
 parameter COUNT_10MS = CLOCK_HZ/100;
 
-defparam B1[3].CNT.INIT = 6;
+defparam B1[3].CNT.INIT = 2;
 
 bit[0:3][3:0] bcd;
 bit[0:4] en;

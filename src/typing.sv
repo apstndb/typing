@@ -18,6 +18,7 @@ typedef enum {TITLE_INIT, TITLE, PLAY_INIT, PLAY, RESULT_INIT, RESULT} mode_t;
 mode_t current_mode;
 byte unsigned scancode;
 byte unsigned dIn;
+bit[9:0] typeCountDiv3;
 bit[9:0] typeCount;
 bit[3:0] charNum;
 bit[3:0] charNumPrev;
@@ -34,7 +35,7 @@ bit[0:7][7:0] next_string;
 wire[3:0] random;
 
 assign dIn = 8'h20;
-
+assign typeCountDiv3 = typeCount*3;
 min_counter MIN (.*,
 		.clk(clk && current_mode == PLAY),
 		.reset(reset || current_mode == PLAY_INIT),
@@ -113,9 +114,9 @@ always@(posedge clk, posedge reset)
 		RESULT_INIT: begin
 			target_string <= 64'h526573756c740000;
 			next_string <= {8'h00,
-				hex2ascii(typeCount/100%10),
-				hex2ascii(typeCount/10%10),
-				hex2ascii(typeCount%10),
+				hex2ascii(typeCountDiv3/100%10),
+				hex2ascii(typeCountDiv3/10%10),
+				hex2ascii(typeCountDiv3%10),
 				8'h20, 8'h63, 8'h70, 8'h6d
 			};
 			wLineEnNext <= 1;
